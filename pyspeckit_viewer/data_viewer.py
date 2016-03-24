@@ -1,33 +1,77 @@
+import os
+
+import pyspeckit
+import matplotlib
+
+from glue.utils.qt import load_ui
+from glue.external.qt.QtCore import Qt
+from glue.external.qt import QtGui
+from glue.external.six import iteritems
+
+from glue.utils import nonpartial
 from glue.viewers.common.qt.data_viewer import DataViewer
 from glue.viewers.common.qt.mpl_widget import MplWidget
 from glue.viewers.common.qt.toolbar import GlueToolbar
 from glue.core.roi import RectangularROI, XRangeROI
 from glue.viewers.common.qt.mouse_mode import (RectangleMode, HRangeMode,)
-from astropy.extern.six import iteritems
-import pyspeckit
-import matplotlib
+from glue.utils.qt.widget_properties import CurrentTabProperty
+
+from .viewer_options import OptionsWidget
+
 
 class PyspeckitViewer(DataViewer):
 
     LABEL = "Pyspeckit data viewer"
 
+    mode = CurrentTabProperty('_control_panel.tab_mode')
+
     def __init__(self, session, parent=None):
         super(PyspeckitViewer, self).__init__(session, parent=parent)
+
         self._mpl_widget = MplWidget()
         self._mpl_axes = self._mpl_widget.canvas.fig.add_subplot(1,1,1)
-        self.setCentralWidget(self._mpl_widget)
+
+        self._control_panel = load_ui('control_panel.ui', None,
+                                directory=os.path.dirname(__file__))
+
+        self._options_widget = OptionsWidget(data_viewer=self)
+
+        self._splitter = QtGui.QSplitter()
+        self._splitter.setOrientation(Qt.Horizontal)
+        self._splitter.addWidget(self._mpl_widget)
+        self._splitter.addWidget(self._control_panel)
+
+        self.setCentralWidget(self._splitter)
 
         self.toolbar = self.make_toolbar()
 
+        self._control_panel.tab_mode.currentChanged.connect(nonpartial(self.set_mode))
+
+    def set_mode(self):
+        if self.mode == 'Fit Line':
+            self.Spectrum.specfit(interactive=True)
+        elif self.mode == 'Fit Continuum':
+            self.Spectrum.baseline(interactive=True, reset_selection=True)
+        else:
+            raise NotImplementedError("Unknown mode: {0}".format(self.mode))
+
     def add_data(self, data):
-        sp = pyspeckit.Spectrum(data=data['PRIMARY'],
-                                # TODO: generalize the x-axis generation
-                                xarr=data['Vrad']*data.coords.wcs.wcs.cunit[0])
-                                #xarr=data[data.coords.wcs.wcs.ctype[0]]*data.coords.wcs.wcs.cunit[0])
+
+        self._options_widget.append(data)
+
+        x_comp_id = data.world_component_ids[0]
+        self._options_widget.x_att = x_comp_id.label
+
+        y_comp_id = self._options_widget.y_att[0]
+
+        # TODO: have a better way to query the unit in Glue Data objects
+
+        sp = pyspeckit.Spectrum(data=data[y_comp_id], xarr=data[x_comp_id] * data.coords.wcs.wcs.cunit[0])
+
         self.Spectrum = sp
 
         # DO NOT use this hack IF pyspeckit version includes the fix that checks for 'number'
-        #self._mpl_axes.figure.number = 1
+        self._mpl_axes.figure.number = 1
 
         sp.plotter(axis=self._mpl_axes)
         self.Spectrum.plotter.figure.canvas.manager.toolbar = self.toolbar
@@ -61,7 +105,6 @@ class PyspeckitViewer(DataViewer):
 
             event_manager(m1, force_over_toolbar=True)
             event_manager(m2, force_over_toolbar=True)
-            print(mode.roi())
 
         rect = RectangleMode(axes, roi_callback=apply_mode)
         xra = HRangeMode(axes, roi_callback=apply_mode)
@@ -82,3 +125,6 @@ class PyspeckitViewer(DataViewer):
             #mode.enabled.add_callback(disable_pyspeckit_callbacks)
         self.addToolBar(result)
         return result
+
+    def options_widget(self):
+        return self._options_widget
