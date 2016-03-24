@@ -7,14 +7,14 @@
     <x>0</x>
     <y>0</y>
     <width>373</width>
-    <height>266</height>
+    <height>341</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridlayout">
-   <item row="0" column="0">
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="1">
     <widget class="QTabWidget" name="tab_mode">
      <property name="currentIndex">
       <number>0</number>
@@ -24,52 +24,51 @@
        <string>Fit Line</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_2">
+       <item row="3" column="0">
+        <widget class="QRadioButton" name="radio_line_selection">
          <property name="text">
-          <string>Fitter</string>
+          <string>Region selection</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QComboBox" name="combo_line_fitter"/>
+       <item row="2" column="0">
+        <widget class="QRadioButton" name="radio_line_peak">
+         <property name="text">
+          <string>Peak/width identification</string>
+         </property>
+        </widget>
        </item>
-       <item row="5" column="0" colspan="2">
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Current mode:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Fitter:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QComboBox" name="combo_line_fitter_2"/>
+       </item>
+       <item row="6" column="0">
         <widget class="QTextEdit" name="textEdit_2"/>
-       </item>
-       <item row="3" column="0" colspan="2">
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QToolButton" name="button_line_identify">
-           <property name="text">
-            <string>Identify Peak</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="button_line_select">
-           <property name="text">
-            <string>Select Region</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="button_line_fit">
-           <property name="text">
-            <string>Fit</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
        </item>
       </layout>
      </widget>
@@ -77,67 +76,74 @@
       <attribute name="title">
        <string>Fit Continuum</string>
       </attribute>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label">
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
          <property name="text">
-          <string>Fitter</string>
+          <string>Fitter:</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QComboBox" name="combo_continuum_fitter"/>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="font">
+          <font>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Current mode:</string>
+         </property>
+        </widget>
        </item>
-       <item row="5" column="0" colspan="2">
-        <widget class="QTextEdit" name="textEdit"/>
+       <item row="5" column="0">
+        <widget class="QComboBox" name="radio_cont_fitter"/>
        </item>
-       <item row="3" column="0" colspan="2">
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="QToolButton" name="button_continuum_select">
-           <property name="text">
-            <string>Select Region</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="button_continuum_exclude">
-           <property name="text">
-            <string>Exclude Region</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="button_continuum_fit">
-           <property name="text">
-            <string>Fit</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="button_continuum_subtract">
-           <property name="text">
-            <string>Subtract</string>
-           </property>
-           <property name="checkable">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
-        </layout>
+       <item row="2" column="0">
+        <widget class="QRadioButton" name="radio_cont_selection">
+         <property name="text">
+          <string>Region selection</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QTextEdit" name="textEdit_2"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QRadioButton" name="radio_cont_exclusion">
+         <property name="text">
+          <string>Region exclusion</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
     </widget>
+   </item>
+   <item row="2" column="1">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="button_fit">
+       <property name="text">
+        <string>Fit</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="button_subtract">
+       <property name="text">
+        <string>Subtract</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
