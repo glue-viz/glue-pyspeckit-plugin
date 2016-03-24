@@ -24,7 +24,8 @@ class PyspeckitViewer(DataViewer):
                                 #xarr=data[data.coords.wcs.wcs.ctype[0]]*data.coords.wcs.wcs.cunit[0])
         self.spectrum = sp
 
-        self._mpl_axes.figure.number = 1
+        # DO NOT use this hack IF pyspeckit version includes the fix that checks for 'number'
+        #self._mpl_axes.figure.number = 1
 
         self.plotter = sp.plotter(axis=self._mpl_axes)
 
@@ -34,7 +35,7 @@ class PyspeckitViewer(DataViewer):
         axes = self._mpl_axes
 
         def apply_mode(mode):
-            return self.apply_roi(mode.roi())
+            print(mode.roi())
 
         rect = RectangleMode(axes, roi_callback=apply_mode)
         xra = HRangeMode(axes, roi_callback=apply_mode)
