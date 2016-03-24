@@ -49,9 +49,9 @@ class PyspeckitViewer(DataViewer):
 
     def set_mode(self):
         if self.mode == 'Fit Line':
-            self.Spectrum.specfit(interactive=True)
+            self.spectrum.specfit(interactive=True)
         elif self.mode == 'Fit Continuum':
-            self.Spectrum.baseline(interactive=True, reset_selection=True)
+            self.spectrum.baseline(interactive=True, reset_selection=True)
         else:
             raise NotImplementedError("Unknown mode: {0}".format(self.mode))
 
@@ -68,13 +68,13 @@ class PyspeckitViewer(DataViewer):
 
         sp = pyspeckit.Spectrum(data=data[y_comp_id], xarr=data[x_comp_id] * data.coords.wcs.wcs.cunit[0])
 
-        self.Spectrum = sp
+        self.spectrum = sp
 
         # DO NOT use this hack IF pyspeckit version includes the fix that checks for 'number'
         self._mpl_axes.figure.number = 1
 
         sp.plotter(axis=self._mpl_axes)
-        self.Spectrum.plotter.figure.canvas.manager.toolbar = self.toolbar
+        self.spectrum.plotter.figure.canvas.manager.toolbar = self.toolbar
 
         return True
 
@@ -83,7 +83,7 @@ class PyspeckitViewer(DataViewer):
 
         def apply_mode(mode):
 
-            for key,val in iteritems(self.Spectrum.plotter.figure.canvas.callbacks.callbacks['button_press_event']):
+            for key,val in iteritems(self.spectrum.plotter.figure.canvas.callbacks.callbacks['button_press_event']):
                 if "event_manager" in val.func.__name__:
                     event_manager = val.func
 
@@ -95,7 +95,7 @@ class PyspeckitViewer(DataViewer):
                 x1 = roi.min
                 x2 = roi.max
             y = 0
-            canvas = self.Spectrum.plotter.figure.canvas
+            canvas = self.spectrum.plotter.figure.canvas
             m1 = matplotlib.backend_bases.MouseEvent('button_press_event', canvas, x1, y, button=1)
             m1.xdata = x1
             m1.ydata = y
