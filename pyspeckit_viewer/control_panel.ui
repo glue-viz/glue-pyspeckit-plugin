@@ -15,7 +15,7 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <widget class="QTabWidget" name="tab_mode">
+    <widget class="QTabWidget" name="combo_line_fitter">
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -40,23 +40,32 @@
        <item row="3" column="0" colspan="2">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QToolButton" name="button_identify_2">
+          <widget class="QToolButton" name="button_line_identify">
            <property name="text">
             <string>Identify Peak</string>
            </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="button_select_2">
-           <property name="text">
-            <string>Select Region</string>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="button_fit_2">
+          <widget class="QToolButton" name="button_line_select">
+           <property name="text">
+            <string>Select Region</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="button_line_fit">
            <property name="text">
             <string>Fit</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -77,7 +86,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QComboBox" name="comboBox"/>
+        <widget class="QComboBox" name="combo_continuum_fitter"/>
        </item>
        <item row="5" column="0" colspan="2">
         <widget class="QTextEdit" name="textEdit"/>
@@ -85,30 +94,42 @@
        <item row="3" column="0" colspan="2">
         <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QToolButton" name="button_identify">
+          <widget class="QToolButton" name="button_continuum_select">
            <property name="text">
             <string>Select Region</string>
            </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="button_select">
+          <widget class="QToolButton" name="button_continuum_exclude">
            <property name="text">
             <string>Exclude Region</string>
            </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QToolButton" name="button_fit">
-           <property name="text">
-            <string>Fit</string>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="toolButton">
+          <widget class="QToolButton" name="button_continuum_fit">
+           <property name="text">
+            <string>Fit</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="button_continuum_subtract">
            <property name="text">
             <string>Subtract</string>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
