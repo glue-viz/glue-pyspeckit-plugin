@@ -19,11 +19,16 @@ class PyspeckitViewer(DataViewer):
 
     def add_data(self, data):
         sp = pyspeckit.Spectrum(data=data['PRIMARY'],
+                                # TODO: generalize the x-axis generation
                                 xarr=data['Vrad']*data.coords.wcs.wcs.cunit[0])
                                 #xarr=data[data.coords.wcs.wcs.ctype[0]]*data.coords.wcs.wcs.cunit[0])
+        self.spectrum = sp
 
         self._mpl_axes.figure.number = 1
-        sp.plotter(axis=self._mpl_axes)
+
+        self.plotter = sp.plotter(axis=self._mpl_axes)
+        sp.plotter.debug=True
+        sp.plotter._mpl_connect()
         return True
 
     def _mouse_modes(self):
