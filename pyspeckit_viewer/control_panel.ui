@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
+  <layout class="QGridLayout" name="tab_mode">
    <item row="0" column="0">
     <widget class="QTabWidget" name="combo_line_fitter">
      <property name="currentIndex">
@@ -32,7 +32,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QComboBox" name="comboBox_2"/>
+        <widget class="QComboBox" name="combo_line_fitter"/>
        </item>
        <item row="5" column="0" colspan="2">
         <widget class="QTextEdit" name="textEdit_2"/>
