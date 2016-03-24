@@ -1,5 +1,6 @@
 from glue.viewers.common.qt.data_viewer import DataViewer
 from glue.viewers.common.qt.mpl_widget import MplWidget
+import pyspeckit
 
 class PyspeckitViewer(DataViewer):
 
@@ -12,5 +13,10 @@ class PyspeckitViewer(DataViewer):
         self.setCentralWidget(self._mpl_widget)
 
     def add_data(self, data):
+        sp = pyspeckit.Spectrum(data=data['PRIMARY'],
+                                xarr=data['Vrad']*data.coords.wcs.wcs.cunit[0])
+                                #xarr=data[data.coords.wcs.wcs.ctype[0]]*data.coords.wcs.wcs.cunit[0])
+
+        self._mpl_axes.figure.number = 1
+        sp.plotter(axis=self._mpl_axes)
         return True
-    
