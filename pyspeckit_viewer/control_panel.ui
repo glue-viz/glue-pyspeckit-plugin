@@ -13,9 +13,9 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="tab_mode">
+  <layout class="QGridLayout" name="gridlayout">
    <item row="0" column="0">
-    <widget class="QTabWidget" name="combo_line_fitter">
+    <widget class="QTabWidget" name="tab_mode">
      <property name="currentIndex">
       <number>0</number>
      </property>
