@@ -27,7 +27,7 @@ class PyspeckitViewer(DataViewer):
         return True
 
     def _mouse_modes(self):
-        axes = self.client.axes
+        axes = self._mpl_axes
 
         def apply_mode(mode):
             return self.apply_roi(mode.roi())
