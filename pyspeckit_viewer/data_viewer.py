@@ -28,7 +28,6 @@ class PyspeckitViewer(DataViewer):
 
         self.plotter = sp.plotter(axis=self._mpl_axes)
         sp.plotter.debug=True
-        sp.plotter._mpl_connect()
         return True
 
     def _mouse_modes(self):
