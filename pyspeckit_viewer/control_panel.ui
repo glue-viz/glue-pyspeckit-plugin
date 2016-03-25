@@ -68,7 +68,7 @@
         <widget class="QComboBox" name="combo_line_fitter_2"/>
        </item>
        <item row="6" column="0">
-        <widget class="QTextEdit" name="textEdit_2"/>
+        <widget class="QTextEdit" name="text_line"/>
        </item>
       </layout>
      </widget>
@@ -114,7 +114,7 @@
         </widget>
        </item>
        <item row="6" column="0">
-        <widget class="QTextEdit" name="textEdit_2"/>
+        <widget class="QTextEdit" name="text_continuum"/>
        </item>
        <item row="3" column="0">
         <widget class="QRadioButton" name="radio_cont_exclusion">
