@@ -7,6 +7,7 @@ from glue.utils.qt import load_ui
 from glue.external.qt.QtCore import Qt
 from glue.external.qt import QtGui
 from glue.external.six import iteritems
+from glue.core.callback_property import add_callback
 
 from glue.utils import nonpartial
 from glue.viewers.common.qt.data_viewer import DataViewer
@@ -44,13 +45,13 @@ class PyspeckitViewer(DataViewer):
         self._line_mode.addButton(self._control_panel.radio_line_peak)
         self._line_mode.addButton(self._control_panel.radio_line_selection)
 
-        self._line_mode.buttonClicked.connect(nonpartial(lambda x: self.set_mode(init=True)))
+        self._line_mode.buttonClicked.connect(nonpartial(lambda: self.set_mode(init=True)))
 
         self._cont_mode = QtGui.QButtonGroup()
         self._cont_mode.addButton(self._control_panel.radio_cont_selection)
         self._cont_mode.addButton(self._control_panel.radio_cont_exclusion)
 
-        self._cont_mode.buttonClicked.connect(nonpartial(lambda x: self.set_mode(init=True)))
+        self._cont_mode.buttonClicked.connect(nonpartial(lambda: self.set_mode(init=True)))
 
         self._options_widget = OptionsWidget(data_viewer=self)
 
@@ -64,7 +65,7 @@ class PyspeckitViewer(DataViewer):
         self.toolbar = self.make_toolbar()
 
         # nonpartial = wrapper that says don't pass additional arguments
-        self._control_panel.tab_mode.currentChanged.connect(nonpartial(lambda x: self.set_mode(init=True)))
+        self._control_panel.tab_mode.currentChanged.connect(nonpartial(lambda: self.set_mode(init=True)))
         #self._control_panel.button_line_identify.toggled.connect(nonpartial(self.set_click_mode))
         #self._control_panel.radio_button....toggled.connect(nonpartial(self.set_click_mode))
         self._control_panel.button_fit.clicked.connect(nonpartial(self.run_fitter))
@@ -72,6 +73,7 @@ class PyspeckitViewer(DataViewer):
 
 
     def set_mode(self, init=False):
+        print("Setting mode with init={0}".format(init))
         # do not allow THIS to override "official" toolbar modes: we handle those correctly already
         overwriteable_modes = ('line_identify', 'line_select', 'cont_select', 'cont_exclude', '')
         #from astropy import log
@@ -212,7 +214,7 @@ class PyspeckitViewer(DataViewer):
 
         for mode in self._mouse_modes():
             result.add_mode(mode)
-            mode.enabled.add_callback(nonpartial(self.set_mode))
+            add_callback(mode, 'enabled', nonpartial(self.set_mode))
         self.addToolBar(result)
         return result
 
