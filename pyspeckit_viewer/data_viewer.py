@@ -14,7 +14,7 @@ from glue.viewers.common.qt.mpl_widget import MplWidget
 from glue.viewers.common.qt.toolbar import GlueToolbar
 from glue.core.roi import RectangularROI, XRangeROI
 from glue.viewers.common.qt.mouse_mode import (RectangleMode, HRangeMode,)
-from glue.utils.qt.widget_properties import CurrentTabProperty, ButtonProperty
+from glue.utils.qt.widget_properties import CurrentTabProperty, ButtonProperty, TextProperty
 
 from .viewer_options import OptionsWidget
 
@@ -30,6 +30,9 @@ class PyspeckitViewer(DataViewer):
 
     cont_select = ButtonProperty('_control_panel.radio_cont_selection')
     cont_exclude = ButtonProperty('_control_panel.radio_cont_exclusion')
+
+    log_line = TextProperty('_control_panel.text_line')
+    log_cont = TextProperty('_control_panel.text_cont')
 
     def __init__(self, session, parent=None):
         super(PyspeckitViewer, self).__init__(session, parent=parent)
