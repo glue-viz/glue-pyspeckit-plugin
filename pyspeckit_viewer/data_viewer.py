@@ -76,6 +76,7 @@ class PyspeckitViewer(DataViewer):
         self._control_panel.button_fit.clicked.connect(nonpartial(self.run_fitter))
         #self._control_panel.
 
+        self.spectra = {}
         self.spectrum = None
 
 
@@ -170,18 +171,18 @@ class PyspeckitViewer(DataViewer):
 
         print("Setting new data")
         if data.ndim == 3:
-            x_comp_id = data.world_component_ids[2]
+            x_comp_id = data.world_component_ids[0]
             xunit = data.coords.wcs.wcs.cunit[2]
             cubedata = data[self._options_widget.y_att[0]]
             print('cubedata shape', cubedata.shape)
             if mask is not None:
                 cubedata = np.ma.masked_array(cubedata, ~mask)
-                meandata = cubedata.mean(axis=1).mean(axis=0)
+                meandata = cubedata.mean(axis=2).mean(axis=1)
             else:
-                meandata = cubedata.mean(axis=(0,1))
-            print('mendata shape: ', meandata.shape)
+                meandata = cubedata.mean(axis=(1,2))
+            print('meandata shape: ', meandata.shape)
             ydata = meandata
-            xdata = data[x_comp_id][0,0,:]
+            xdata = data[x_comp_id][:,0,0]
             print("xdata shape: ",xdata.shape)
             xdata = u.Quantity(xdata, xunit)
         elif data.ndim == 2:
@@ -198,20 +199,21 @@ class PyspeckitViewer(DataViewer):
         self._options_widget.x_att = x_comp_id.label
         print("Done averaging or loading 1d")
 
-        if self.spectrum is None:
-            self.spectrum = pyspeckit.Spectrum(data=ydata, xarr=xdata)
-            self.spectrum.plotter(axis=self._mpl_axes)
-            self.spectrum.plotter.figure.canvas.manager.toolbar = self.toolbar
-            self.spectrum.plotter.axis.figure.canvas.mpl_connect('button_press_event',
-                                                                 self.click_manager)
+        sp = pyspeckit.Spectrum(data=ydata, xarr=xdata)
+        sp.plotter(axis=self._mpl_axes, clear=False, color=data.style.color)
+        sp.plotter.figure.canvas.manager.toolbar = self.toolbar
+        sp.plotter.axis.figure.canvas.mpl_connect('button_press_event',
+                                                  self.click_manager)
+        self.spectra[data] = sp
+        self.spectrum = sp
 
-        else:
-            # TODO: have a better way to query the unit in Glue Data objects
+        #else:
+        #    # TODO: have a better way to query the unit in Glue Data objects
 
-            self.spectrum.data = ydata
-            self.spectrum.xarr = pyspeckit.units.SpectroscopicAxis(xdata)
+        #    self.spectrum.data = ydata
+        #    self.spectrum.xarr = pyspeckit.units.SpectroscopicAxis(xdata)
 
-            self.spectrum.plotter(clear=True)
+        #    self.spectrum.plotter(clear=True)
 
 
     def _mouse_modes(self):
@@ -242,6 +244,12 @@ class PyspeckitViewer(DataViewer):
                 m2 = matplotlib.backend_bases.MouseEvent('button_press_event', canvas, x2, y, button=1)
                 m2.xdata = x2
                 m2.ydata = y
+
+                # enforce that the selection is "Fresh", ignoring previous clicks
+                if self.line_select:
+                    self.spectrum.fitter.nclicks_b1 = 0
+                elif self.cont_select:
+                    self.spectrum.baseline.nclicks_b1 = 0
 
                 event_manager(m1, force_over_toolbar=True)
                 event_manager(m2, force_over_toolbar=True)
