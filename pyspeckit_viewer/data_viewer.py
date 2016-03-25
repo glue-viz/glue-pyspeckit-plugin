@@ -72,21 +72,31 @@ class PyspeckitViewer(DataViewer):
 
 
     def set_mode(self):
+        # do not allow THIS to override "official" toolbar modes: we handle those correctly already
+        overwriteable_modes = ('line_identify', 'line_select', 'cont_select', 'cont_exclude', '')
+        from astropy import log
+        log.setLevel('DEBUG')
         if self.mode == 'Fit Line':
             self.spectrum.specfit(interactive=True) # , print_message=False)
+            self.spectrum.specfit.debug = self.spectrum.specfit._debug = True
             if self.line_identify:
-                self.toolbar.mode = 'line_identify'
+                if self.toolbar.mode in overwriteable_modes:
+                    self.toolbar.mode = 'line_identify'
                 print("Identify mode")
             elif self.line_select:
-                self.toolbar.mode = 'line_select'
+                if self.toolbar.mode in overwriteable_modes:
+                    self.toolbar.mode = 'line_select'
                 print("Select mode")
         elif self.mode == 'Fit Continuum':
             self.spectrum.baseline(interactive=True, reset_selection=True) # , print_message=False)
+            self.spectrum.baseline.debug = self.spectrum.baseline._debug = True
             if self.cont_select:
-                self.toolbar.mode = 'cont_select'
+                if self.toolbar.mode in overwriteable_modes:
+                    self.toolbar.mode = 'cont_select'
                 print("Select mode")
             elif self.cont_exclude:
-                self.toolbar.mode = 'cont_exclude'
+                if self.toolbar.mode in overwriteable_modes:
+                    self.toolbar.mode = 'cont_exclude'
                 print("Exclude mode")
 
         else:
@@ -163,6 +173,7 @@ class PyspeckitViewer(DataViewer):
 
             if self.line_select or self.cont_select:
                 roi = mode.roi()
+                print("ROI: ",roi)
                 if isinstance(roi, RectangularROI):
                     x1 = roi.xmin
                     x2 = roi.xmax
