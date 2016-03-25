@@ -145,6 +145,11 @@ class PyspeckitViewer(DataViewer):
             print("Toolbar: mode={0}".format(self.toolbar.mode))
 
 
+    def add_subset(self, subset):
+        # do stuff
+        # a subset is a data object except it's not....
+        pass
+
     def add_data(self, data):
 
         self._options_widget.append(data)
