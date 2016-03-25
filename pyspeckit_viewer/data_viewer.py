@@ -44,13 +44,13 @@ class PyspeckitViewer(DataViewer):
         self._line_mode.addButton(self._control_panel.radio_line_peak)
         self._line_mode.addButton(self._control_panel.radio_line_selection)
 
-        self._line_mode.buttonClicked.connect(nonpartial(self._update_line_mode))
+        self._line_mode.buttonClicked.connect(nonpartial(self.set_mode))
 
         self._cont_mode = QtGui.QButtonGroup()
         self._cont_mode.addButton(self._control_panel.radio_cont_selection)
         self._cont_mode.addButton(self._control_panel.radio_cont_exclusion)
 
-        self._cont_mode.buttonClicked.connect(nonpartial(self._update_cont_mode))
+        self._cont_mode.buttonClicked.connect(nonpartial(self.set_mode))
 
         self._options_widget = OptionsWidget(data_viewer=self)
 
@@ -70,23 +70,25 @@ class PyspeckitViewer(DataViewer):
         self._control_panel.button_fit.clicked.connect(nonpartial(self.run_fitter))
         #self._control_panel.
 
-    def _update_line_mode(self):
-        if self.line_identify:
-            print("Identify mode")
-        elif self.line_select:
-            print("Select mode")
-
-    def _update_cont_mode(self):
-        if self.cont_select:
-            print("Select mode")
-        elif self.cont_exclude:
-            print("Exclude mode")
 
     def set_mode(self):
         if self.mode == 'Fit Line':
             self.spectrum.specfit(interactive=True) # , print_message=False)
+            if self.line_identify:
+                self.toolbar.mode = 'line_identify'
+                print("Identify mode")
+            elif self.line_select:
+                self.toolbar.mode = 'line_select'
+                print("Select mode")
         elif self.mode == 'Fit Continuum':
             self.spectrum.baseline(interactive=True, reset_selection=True) # , print_message=False)
+            if self.cont_select:
+                self.toolbar.mode = 'cont_select'
+                print("Select mode")
+            elif self.cont_exclude:
+                self.toolbar.mode = 'cont_exclude'
+                print("Exclude mode")
+
         else:
             raise NotImplementedError("Unknown mode: {0}".format(self.mode))
 
@@ -106,8 +108,8 @@ class PyspeckitViewer(DataViewer):
         """
         Pass events to the appropriate pyspeckit actions
         """
-        if self.toolbar.mode == '':
-            print("Toolbar not active")
+        if self.toolbar.mode in ('line_identify', 'line_select', 'cont_select', 'cont_exclude'):
+            print("Toolbar: mode={0}".format(self.toolbar.mode))
             if self.line_identify:
                 self.spectrum.specfit.guesspeakwidth(event)
                 self.spectrum.plotter.refresh()
@@ -120,7 +122,7 @@ class PyspeckitViewer(DataViewer):
             else:
                 print("Not in line fitter mode, clicks do NOTHING.")
         else:
-            print("Toolbar active")
+            print("Toolbar: mode={0}".format(self.toolbar.mode))
 
 
     def add_data(self, data):
@@ -146,6 +148,7 @@ class PyspeckitViewer(DataViewer):
 
         self.spectrum.plotter.axis.figure.canvas.mpl_connect('button_press_event',
                                                              self.click_manager)
+        self.set_mode()
 
         return True
 
@@ -158,24 +161,27 @@ class PyspeckitViewer(DataViewer):
                 if "event_manager" in val.func.__name__:
                     event_manager = val.func
 
-            roi = mode.roi()
-            if isinstance(roi, RectangularROI):
-                x1 = roi.xmin
-                x2 = roi.xmax
-            elif isinstance(roi, XRangeROI):
-                x1 = roi.min
-                x2 = roi.max
-            y = 0
-            canvas = self.spectrum.plotter.figure.canvas
-            m1 = matplotlib.backend_bases.MouseEvent('button_press_event', canvas, x1, y, button=1)
-            m1.xdata = x1
-            m1.ydata = y
-            m2 = matplotlib.backend_bases.MouseEvent('button_press_event', canvas, x2, y, button=1)
-            m2.xdata = x2
-            m2.ydata = y
+            if self.line_select or self.cont_select:
+                roi = mode.roi()
+                if isinstance(roi, RectangularROI):
+                    x1 = roi.xmin
+                    x2 = roi.xmax
+                elif isinstance(roi, XRangeROI):
+                    x1 = roi.min
+                    x2 = roi.max
+                if x1>x2:
+                    x1,x2 = x2,x1
+                y = 0
+                canvas = self.spectrum.plotter.figure.canvas
+                m1 = matplotlib.backend_bases.MouseEvent('button_press_event', canvas, x1, y, button=1)
+                m1.xdata = x1
+                m1.ydata = y
+                m2 = matplotlib.backend_bases.MouseEvent('button_press_event', canvas, x2, y, button=1)
+                m2.xdata = x2
+                m2.ydata = y
 
-            event_manager(m1, force_over_toolbar=True)
-            event_manager(m2, force_over_toolbar=True)
+                event_manager(m1, force_over_toolbar=True)
+                event_manager(m2, force_over_toolbar=True)
 
         rect = RectangleMode(axes, roi_callback=apply_mode)
         xra = HRangeMode(axes, roi_callback=apply_mode)
