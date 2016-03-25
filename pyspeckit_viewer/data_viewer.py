@@ -206,20 +206,19 @@ class PyspeckitViewer(DataViewer):
         return [rect, xra,]
 
     def make_toolbar(self):
-        result = GlueToolbar(self._mpl_widget.canvas, self,
-                             name='pyspeckit Plot')
-
-        #def disable_pyspeckit_callbacks(enable):
-        #    if enable:
-        #        # disable
-        #    else:
-        #        # re-enable...
+        toolbar = GlueToolbar(self._mpl_widget.canvas, self,
+                              name='pyspeckit Plot')
 
         for mode in self._mouse_modes():
-            result.add_mode(mode)
-            add_callback(mode, 'enabled', nonpartial(self.set_mode))
-        self.addToolBar(result)
-        return result
+            mode_result = toolbar.add_mode(mode)
+            #add_callback(mode, 'enabled', nonpartial(self.set_mode))
+
+        #for mode_result in toolbar. :
+        #    mode_result.triggered.connect(nonpartial(self.set_mode))
+        toolbar.actionTriggered.connect(nonpartial(self.set_mode))
+
+        self.addToolBar(toolbar)
+        return toolbar
 
     def options_widget(self):
         return self._options_widget
