@@ -2,6 +2,7 @@ import os
 
 import pyspeckit
 import matplotlib
+from astropy import units as u
 
 from glue.utils.qt import load_ui
 from glue.external.qt.QtCore import Qt
@@ -73,6 +74,8 @@ class PyspeckitViewer(DataViewer):
         #self._control_panel.radio_button....toggled.connect(nonpartial(self.set_click_mode))
         self._control_panel.button_fit.clicked.connect(nonpartial(self.run_fitter))
         #self._control_panel.
+
+        self.spectrum = None
 
 
     def set_mode(self, init=False):
@@ -146,28 +149,59 @@ class PyspeckitViewer(DataViewer):
 
         self._options_widget.append(data)
 
-        x_comp_id = data.world_component_ids[0]
-        self._options_widget.x_att = x_comp_id.label
-
-        y_comp_id = self._options_widget.y_att[0]
-
         # TODO: have a better way to query the unit in Glue Data objects
-
-        sp = pyspeckit.Spectrum(data=data[y_comp_id], xarr=data[x_comp_id] * data.coords.wcs.wcs.cunit[0])
-
-        self.spectrum = sp
 
         # DO NOT use this hack IF pyspeckit version includes the fix that checks for 'number'
         #self._mpl_axes.figure.number = 1
 
-        sp.plotter(axis=self._mpl_axes)
-        self.spectrum.plotter.figure.canvas.manager.toolbar = self.toolbar
+        self.set_new_data(data)
 
-        self.spectrum.plotter.axis.figure.canvas.mpl_connect('button_press_event',
-                                                             self.click_manager)
         self.set_mode()
 
         return True
+
+    def set_new_data(self, data):
+        print("Setting new data")
+        if data.ndim == 3:
+            x_comp_id = data.world_component_ids[2]
+            xunit = data.coords.wcs.wcs.cunit[2]
+            cubedata = data[self._options_widget.y_att[0]]
+            print('cubedata shape', cubedata.shape)
+            meandata = cubedata.mean(axis=(0,1))
+            print('mendata shape: ', meandata.shape)
+            ydata = meandata
+            xdata = data[x_comp_id][0,0,:]
+            print("xdata shape: ",xdata.shape)
+            xdata = u.Quantity(xdata, xunit)
+        elif data.ndim == 2:
+            raise ValueError("can't handle images")
+        elif data.ndim == 1:
+            x_comp_id = data.world_component_ids[0]
+            y_comp_id = self._options_widget.y_att[0]
+            xunit = data.coords.wcs.wcs.cunit[0]
+            xdata = u.Quantity(data[x_comp_id], xunit)
+            ydata = data[y_comp_id]
+        else:
+            raise ValueError("??!?!?!!?wtf?!?!?!")
+    
+        self._options_widget.x_att = x_comp_id.label
+        print("Done averaging or loading 1d")
+
+        if self.spectrum is None:
+            self.spectrum = pyspeckit.Spectrum(data=ydata, xarr=xdata)
+            self.spectrum.plotter(axis=self._mpl_axes)
+            self.spectrum.plotter.figure.canvas.manager.toolbar = self.toolbar
+            self.spectrum.plotter.axis.figure.canvas.mpl_connect('button_press_event',
+                                                                 self.click_manager)
+
+        else:
+            # TODO: have a better way to query the unit in Glue Data objects
+
+            self.spectrum.data = ydata
+            self.spectrum.xarr = pyspeckit.units.SpectroscopicAxis(xdata)
+
+            self.spectrum.plotter(clear=True)
+
 
     def _mouse_modes(self):
         axes = self._mpl_axes
@@ -210,7 +244,7 @@ class PyspeckitViewer(DataViewer):
                               name='pyspeckit Plot')
 
         for mode in self._mouse_modes():
-            mode_result = toolbar.add_mode(mode)
+            toolbar.add_mode(mode)
             #add_callback(mode, 'enabled', nonpartial(self.set_mode))
 
         #for mode_result in toolbar. :
