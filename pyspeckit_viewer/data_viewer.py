@@ -247,9 +247,11 @@ class PyspeckitViewer(DataViewer):
 
                 # enforce that the selection is "Fresh", ignoring previous clicks
                 if self.line_select:
-                    self.spectrum.fitter.nclicks_b1 = 0
+                    if hasattr(self.spectrum, 'fitter'):
+                        self.spectrum.fitter.nclicks_b1 = 0
                 elif self.cont_select:
-                    self.spectrum.baseline.nclicks_b1 = 0
+                    if hasattr(self.spectrum, 'baseline'):
+                        self.spectrum.baseline.nclicks_b1 = 0
 
                 event_manager(m1, force_over_toolbar=True)
                 event_manager(m2, force_over_toolbar=True)
