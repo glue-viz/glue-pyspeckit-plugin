@@ -63,7 +63,12 @@ class PyspeckitViewer(DataViewer):
 
         self.toolbar = self.make_toolbar()
 
+        # nonpartial = wrapper that says don't pass additional arguments
         self._control_panel.tab_mode.currentChanged.connect(nonpartial(self.set_mode))
+        #self._control_panel.button_line_identify.toggled.connect(nonpartial(self.set_click_mode))
+        #self._control_panel.radio_button....toggled.connect(nonpartial(self.set_click_mode))
+        self._control_panel.button_fit.clicked.connect(nonpartial(self.run_fitter))
+        #self._control_panel.
 
     def _update_line_mode(self):
         if self.line_identify:
@@ -79,11 +84,44 @@ class PyspeckitViewer(DataViewer):
 
     def set_mode(self):
         if self.mode == 'Fit Line':
-            self.spectrum.specfit(interactive=True)
+            self.spectrum.specfit(interactive=True) # , print_message=False)
         elif self.mode == 'Fit Continuum':
-            self.spectrum.baseline(interactive=True, reset_selection=True)
+            self.spectrum.baseline(interactive=True, reset_selection=True) # , print_message=False)
         else:
             raise NotImplementedError("Unknown mode: {0}".format(self.mode))
+
+    #def set_click_mode(self):
+    #    assert self.mode == 'Fit Line'
+    #    self.click_mode = 'Peak/Width Identification'
+
+    def run_fitter(self):
+        if self.mode == 'Fit Line':
+            self.spectrum.specfit.button3action(None)
+            self.spectrum.plotter.refresh()
+        elif self.mode == 'Fit Continuum':
+            self.spectrum.baseline.button3action(None)
+            self.spectrum.plotter.refresh()
+
+    def click_manager(self, event):
+        """
+        Pass events to the appropriate pyspeckit actions
+        """
+        if self.toolbar.mode == '':
+            print("Toolbar not active")
+            if self.line_identify:
+                self.spectrum.specfit.guesspeakwidth(event)
+                self.spectrum.plotter.refresh()
+            elif self.line_select and self.mode == 'Fit Line':
+                self.spectrum.specfit.selectregion_interactive(event)
+            elif self.cont_select:
+                self.spectrum.baseline.selectregion_interactive(event)
+            elif self.cont_exclude:
+                self.spectrum.baseline.selectregion_interactive(event, mark_include=False)
+            else:
+                print("Not in line fitter mode, clicks do NOTHING.")
+        else:
+            print("Toolbar active")
+
 
     def add_data(self, data):
 
@@ -101,10 +139,13 @@ class PyspeckitViewer(DataViewer):
         self.spectrum = sp
 
         # DO NOT use this hack IF pyspeckit version includes the fix that checks for 'number'
-        self._mpl_axes.figure.number = 1
+        #self._mpl_axes.figure.number = 1
 
         sp.plotter(axis=self._mpl_axes)
         self.spectrum.plotter.figure.canvas.manager.toolbar = self.toolbar
+
+        self.spectrum.plotter.axis.figure.canvas.mpl_connect('button_press_event',
+                                                             self.click_manager)
 
         return True
 
