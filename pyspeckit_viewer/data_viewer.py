@@ -4,6 +4,7 @@ import pyspeckit
 import matplotlib
 import numpy as np
 from astropy import units as u
+from astropy import log
 
 from glue.utils.qt import load_ui
 from glue.external.qt.QtCore import Qt
@@ -81,7 +82,7 @@ class PyspeckitViewer(DataViewer):
 
 
     def set_mode(self, init=False):
-        print("Setting mode with init={0}".format(init))
+        log.info("Setting mode with init={0}".format(init))
         # do not allow THIS to override "official" toolbar modes: we handle those correctly already
         overwriteable_modes = ('line_identify', 'line_select', 'cont_select', 'cont_exclude', '')
         #from astropy import log
@@ -93,11 +94,11 @@ class PyspeckitViewer(DataViewer):
             if self.line_identify:
                 if self.toolbar.mode in overwriteable_modes:
                     self.toolbar.mode = 'line_identify'
-                print("Identify mode")
+                log.info("Identify mode")
             elif self.line_select:
                 if self.toolbar.mode in overwriteable_modes:
                     self.toolbar.mode = 'line_select'
-                print("Select mode")
+                log.info("Select mode")
         elif self.mode == 'Fit Continuum':
             if init:
                 self.spectrum.baseline(interactive=True, reset_selection=True) # , print_message=False)
@@ -105,11 +106,11 @@ class PyspeckitViewer(DataViewer):
             if self.cont_select:
                 if self.toolbar.mode in overwriteable_modes:
                     self.toolbar.mode = 'cont_select'
-                print("Select mode")
+                log.info("Select mode")
             elif self.cont_exclude:
                 if self.toolbar.mode in overwriteable_modes:
                     self.toolbar.mode = 'cont_exclude'
-                print("Exclude mode")
+                log.info("Exclude mode")
 
         else:
             raise NotImplementedError("Unknown mode: {0}".format(self.mode))
@@ -131,7 +132,7 @@ class PyspeckitViewer(DataViewer):
         Pass events to the appropriate pyspeckit actions
         """
         if self.toolbar.mode in ('line_identify', 'line_select', 'cont_select', 'cont_exclude'):
-            print("Toolbar: mode={0}".format(self.toolbar.mode))
+            log.info("Toolbar: mode={0}".format(self.toolbar.mode))
             if self.line_identify:
                 self.spectrum.specfit.guesspeakwidth(event)
                 self.spectrum.plotter.refresh()
@@ -142,9 +143,9 @@ class PyspeckitViewer(DataViewer):
             elif self.cont_exclude:
                 self.spectrum.baseline.selectregion_interactive(event, mark_include=False)
             else:
-                print("Not in line fitter mode, clicks do NOTHING.")
+                log.info("Not in line fitter mode, clicks do NOTHING.")
         else:
-            print("Toolbar: mode={0}".format(self.toolbar.mode))
+            log.info("Toolbar: mode={0}".format(self.toolbar.mode))
 
 
     def add_subset(self, subset):
@@ -169,21 +170,21 @@ class PyspeckitViewer(DataViewer):
 
     def set_new_data(self, data, mask=None):
 
-        print("Setting new data")
+        log.info("Setting new data")
         if data.ndim == 3:
             x_comp_id = data.world_component_ids[0]
             xunit = data.coords.wcs.wcs.cunit[2]
             cubedata = data[self._options_widget.y_att[0]]
-            print('cubedata shape', cubedata.shape)
+            log.info('cubedata shape: {0}'.format(cubedata.shape))
             if mask is not None:
                 cubedata = np.ma.masked_array(cubedata, ~mask)
                 meandata = cubedata.mean(axis=2).mean(axis=1)
             else:
                 meandata = cubedata.mean(axis=(1,2))
-            print('meandata shape: ', meandata.shape)
+            log.info('meandata shape: {0}'.format(meandata.shape))
             ydata = meandata
             xdata = data[x_comp_id][:,0,0]
-            print("xdata shape: ",xdata.shape)
+            log.info("xdata shape: {0}".format(xdata.shape))
             xdata = u.Quantity(xdata, xunit)
         elif data.ndim == 2:
             raise ValueError("can't handle images")
@@ -197,7 +198,7 @@ class PyspeckitViewer(DataViewer):
             raise ValueError("??!?!?!!?wtf?!?!?!")
 
         self._options_widget.x_att = x_comp_id.label
-        print("Done averaging or loading 1d")
+        log.info("Done averaging or loading 1d")
 
         sp = pyspeckit.Spectrum(data=ydata, xarr=xdata)
         sp.plotter(axis=self._mpl_axes, clear=False, color=data.style.color)
@@ -227,7 +228,7 @@ class PyspeckitViewer(DataViewer):
 
             if self.line_select or self.cont_select:
                 roi = mode.roi()
-                print("ROI: ",roi)
+                log.info("ROI: {0}".format(roi))
                 if isinstance(roi, RectangularROI):
                     x1 = roi.xmin
                     x2 = roi.xmax
