@@ -146,9 +146,8 @@ class PyspeckitViewer(DataViewer):
 
 
     def add_subset(self, subset):
-        # do stuff
         # a subset is a data object except it's not....
-        pass
+        self.set_new_data(subset)
 
     def add_data(self, data):
 
