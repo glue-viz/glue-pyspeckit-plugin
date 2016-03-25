@@ -2,6 +2,7 @@ import os
 
 import pyspeckit
 import matplotlib
+import numpy as np
 from astropy import units as u
 
 from glue.utils.qt import load_ui
@@ -147,7 +148,8 @@ class PyspeckitViewer(DataViewer):
 
     def add_subset(self, subset):
         # a subset is a data object except it's not....
-        self.set_new_data(subset)
+        self._options_widget.append(subset.data)
+        self.set_new_data(subset.data, mask=subset.to_mask())
 
     def add_data(self, data):
 
@@ -164,14 +166,19 @@ class PyspeckitViewer(DataViewer):
 
         return True
 
-    def set_new_data(self, data):
+    def set_new_data(self, data, mask=None):
+
         print("Setting new data")
         if data.ndim == 3:
             x_comp_id = data.world_component_ids[2]
             xunit = data.coords.wcs.wcs.cunit[2]
             cubedata = data[self._options_widget.y_att[0]]
             print('cubedata shape', cubedata.shape)
-            meandata = cubedata.mean(axis=(0,1))
+            if mask is not None:
+                cubedata = np.ma.masked_array(cubedata, ~mask)
+                meandata = cubedata.mean(axis=1).mean(axis=0)
+            else:
+                meandata = cubedata.mean(axis=(0,1))
             print('mendata shape: ', meandata.shape)
             ydata = meandata
             xdata = data[x_comp_id][0,0,:]
@@ -187,7 +194,7 @@ class PyspeckitViewer(DataViewer):
             ydata = data[y_comp_id]
         else:
             raise ValueError("??!?!?!!?wtf?!?!?!")
-    
+
         self._options_widget.x_att = x_comp_id.label
         print("Done averaging or loading 1d")
 
