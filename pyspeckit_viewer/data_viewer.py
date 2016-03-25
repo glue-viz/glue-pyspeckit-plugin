@@ -44,13 +44,13 @@ class PyspeckitViewer(DataViewer):
         self._line_mode.addButton(self._control_panel.radio_line_peak)
         self._line_mode.addButton(self._control_panel.radio_line_selection)
 
-        self._line_mode.buttonClicked.connect(nonpartial(self.set_mode))
+        self._line_mode.buttonClicked.connect(nonpartial(lambda x: self.set_mode(init=True)))
 
         self._cont_mode = QtGui.QButtonGroup()
         self._cont_mode.addButton(self._control_panel.radio_cont_selection)
         self._cont_mode.addButton(self._control_panel.radio_cont_exclusion)
 
-        self._cont_mode.buttonClicked.connect(nonpartial(self.set_mode))
+        self._cont_mode.buttonClicked.connect(nonpartial(lambda x: self.set_mode(init=True)))
 
         self._options_widget = OptionsWidget(data_viewer=self)
 
@@ -64,20 +64,21 @@ class PyspeckitViewer(DataViewer):
         self.toolbar = self.make_toolbar()
 
         # nonpartial = wrapper that says don't pass additional arguments
-        self._control_panel.tab_mode.currentChanged.connect(nonpartial(self.set_mode))
+        self._control_panel.tab_mode.currentChanged.connect(nonpartial(lambda x: self.set_mode(init=True)))
         #self._control_panel.button_line_identify.toggled.connect(nonpartial(self.set_click_mode))
         #self._control_panel.radio_button....toggled.connect(nonpartial(self.set_click_mode))
         self._control_panel.button_fit.clicked.connect(nonpartial(self.run_fitter))
         #self._control_panel.
 
 
-    def set_mode(self):
+    def set_mode(self, init=False):
         # do not allow THIS to override "official" toolbar modes: we handle those correctly already
         overwriteable_modes = ('line_identify', 'line_select', 'cont_select', 'cont_exclude', '')
-        from astropy import log
-        log.setLevel('DEBUG')
+        #from astropy import log
+        #log.setLevel('DEBUG')
         if self.mode == 'Fit Line':
-            self.spectrum.specfit(interactive=True) # , print_message=False)
+            if init:
+                self.spectrum.specfit(interactive=True) # , print_message=False)
             self.spectrum.specfit.debug = self.spectrum.specfit._debug = True
             if self.line_identify:
                 if self.toolbar.mode in overwriteable_modes:
@@ -88,7 +89,8 @@ class PyspeckitViewer(DataViewer):
                     self.toolbar.mode = 'line_select'
                 print("Select mode")
         elif self.mode == 'Fit Continuum':
-            self.spectrum.baseline(interactive=True, reset_selection=True) # , print_message=False)
+            if init:
+                self.spectrum.baseline(interactive=True, reset_selection=True) # , print_message=False)
             self.spectrum.baseline.debug = self.spectrum.baseline._debug = True
             if self.cont_select:
                 if self.toolbar.mode in overwriteable_modes:
@@ -210,7 +212,7 @@ class PyspeckitViewer(DataViewer):
 
         for mode in self._mouse_modes():
             result.add_mode(mode)
-            #mode.enabled.add_callback(disable_pyspeckit_callbacks)
+            mode.enabled.add_callback(nonpartial(self.set_mode))
         self.addToolBar(result)
         return result
 
