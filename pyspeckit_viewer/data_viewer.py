@@ -222,11 +222,8 @@ class PyspeckitViewer(DataViewer):
 
         def apply_mode(mode):
 
-            for key,val in iteritems(self.spectrum.plotter.figure.canvas.callbacks.callbacks['button_press_event']):
-                if "event_manager" in val.func.__name__:
-                    event_manager = val.func
-
             if self.line_select or self.cont_select:
+                assert self.spectrum._active_gui is not None, "No active GUI tool in pyspeckit"
                 roi = mode.roi()
                 log.info("ROI: {0}".format(roi))
                 if isinstance(roi, RectangularROI):
@@ -237,25 +234,8 @@ class PyspeckitViewer(DataViewer):
                     x2 = roi.max
                 if x1>x2:
                     x1,x2 = x2,x1
-                y = 0
-                canvas = self.spectrum.plotter.figure.canvas
-                m1 = matplotlib.backend_bases.MouseEvent('button_press_event', canvas, x1, y, button=1)
-                m1.xdata = x1
-                m1.ydata = y
-                m2 = matplotlib.backend_bases.MouseEvent('button_press_event', canvas, x2, y, button=1)
-                m2.xdata = x2
-                m2.ydata = y
-
-                # enforce that the selection is "Fresh", ignoring previous clicks
-                if self.line_select:
-                    if hasattr(self.spectrum, 'fitter'):
-                        self.spectrum.fitter.nclicks_b1 = 0
-                elif self.cont_select:
-                    if hasattr(self.spectrum, 'baseline'):
-                        self.spectrum.baseline.nclicks_b1 = 0
-
-                event_manager(m1, force_over_toolbar=True)
-                event_manager(m2, force_over_toolbar=True)
+                
+                self.spectrum._active_gui.selectregion(xmin=x1, xmax=x2)
 
         rect = RectangleMode(axes, roi_callback=apply_mode)
         xra = HRangeMode(axes, roi_callback=apply_mode)
