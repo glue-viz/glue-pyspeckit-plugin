@@ -17,7 +17,7 @@
    <item row="0" column="1">
     <widget class="QTabWidget" name="tab_mode">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="tab">
       <attribute name="title">
@@ -41,7 +41,7 @@
         </widget>
        </item>
        <item row="4" column="0">
-        <widget class="QRadioButton" name="radio_line_selection">
+        <widget class="QRadioButton" name="radio_line_select">
          <property name="text">
           <string>Region selection</string>
          </property>
@@ -51,7 +51,7 @@
         <widget class="QTextEdit" name="text_line"/>
        </item>
        <item row="3" column="0">
-        <widget class="QRadioButton" name="radio_line_peak">
+        <widget class="QRadioButton" name="radio_line_identify">
          <property name="text">
           <string>Peak/width identification</string>
          </property>
@@ -128,7 +128,7 @@
         <widget class="QComboBox" name="combo_cont_fitters"/>
        </item>
        <item row="3" column="0">
-        <widget class="QRadioButton" name="radio_cont_selection">
+        <widget class="QRadioButton" name="radio_cont_select">
          <property name="text">
           <string>Region selection</string>
          </property>
@@ -138,7 +138,7 @@
         <widget class="QTextEdit" name="text_continuum"/>
        </item>
        <item row="4" column="0">
-        <widget class="QRadioButton" name="radio_cont_exclusion">
+        <widget class="QRadioButton" name="radio_cont_exclude">
          <property name="text">
           <string>Region exclusion</string>
          </property>

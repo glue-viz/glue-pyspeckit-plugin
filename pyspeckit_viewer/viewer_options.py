@@ -33,8 +33,3 @@ class OptionsWidget(QtGui.QWidget):
 
     def remove(self, data):
         self.y_helper.remove(data)
-
-if __name__ == "__main__":
-
-    from glue.core.data_factories import load_data
-    data = load_data('~/Data/gbt_1d.fits')

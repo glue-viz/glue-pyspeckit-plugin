@@ -20,12 +20,6 @@ class ControlPanel(QtGui.QWidget):
 
     tab_name = CurrentTabProperty('ui.tab_mode')
 
-    line_identify = ButtonProperty('ui.radio_line_peak')
-    line_select = ButtonProperty('ui.radio_line_selection')
-
-    cont_select = ButtonProperty('ui.radio_cont_selection')
-    cont_exclude = ButtonProperty('ui.radio_cont_exclusion')
-
     log_line = TextProperty('ui.text_line')
     log_cont = TextProperty('ui.text_cont')
 
@@ -48,8 +42,8 @@ class ControlPanel(QtGui.QWidget):
 
         self._line_mode = QtGui.QButtonGroup()
         self._line_mode.addButton(self.ui.radio_line_panzoom)
-        self._line_mode.addButton(self.ui.radio_line_peak)
-        self._line_mode.addButton(self.ui.radio_line_selection)
+        self._line_mode.addButton(self.ui.radio_line_identify)
+        self._line_mode.addButton(self.ui.radio_line_select)
         self._line_mode.addButton(self.ui.radio_line_keyboard)
 
         self.ui.radio_line_panzoom.setChecked(True)
@@ -58,8 +52,8 @@ class ControlPanel(QtGui.QWidget):
 
         self._cont_mode = QtGui.QButtonGroup()
         self._cont_mode.addButton(self.ui.radio_cont_panzoom)
-        self._cont_mode.addButton(self.ui.radio_cont_selection)
-        self._cont_mode.addButton(self.ui.radio_cont_exclusion)
+        self._cont_mode.addButton(self.ui.radio_cont_select)
+        self._cont_mode.addButton(self.ui.radio_cont_exclude)
         self._line_mode.addButton(self.ui.radio_cont_keyboard)
 
         self.ui.radio_cont_panzoom.setChecked(True)
@@ -86,17 +80,20 @@ class ControlPanel(QtGui.QWidget):
         self.ui.button_subtract.setEnabled(self.tab_name == "Fit Continuum")
 
     def _mode_changed(self):
-        if self.tab_name == "Fit Line":
-            mode = self._line_mode.checkedButton().objectName().replace('radio_', '')
-        else:
-            mode = self._cont_mode.checkedButton().objectName().replace('radio_', '')
-        self.modeChanged.emit(mode)
+        self.modeChanged.emit(self.mode)
 
     def _fit(self):
-        self.fitEvent.emit('line' if self.tab_name == 'Fit Line' else 'cont')
+        self.fitEvent.emit(self.mode)
 
     def _subtract(self):
-        self.subtractEvent.emit('line' if self.tab_name == 'Fit Line' else 'cont')
+        self.subtractEvent.emit(self.mode)
+
+    @property
+    def mode(self):
+        if self.tab_name == "Fit Line":
+            return self._line_mode.checkedButton().objectName().replace('radio_', '')
+        else:
+            return self._cont_mode.checkedButton().objectName().replace('radio_', '')
 
 
 if __name__ == "__main__":
