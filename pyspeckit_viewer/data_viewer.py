@@ -82,14 +82,16 @@ class PyspeckitViewer(DataViewer):
 
 
     def set_mode(self, init=False):
-        log.info("Setting mode with init={0}".format(init))
+        log.info("Setting mode with init={0}.  mode={1}".format(init, self.mode))
         # do not allow THIS to override "official" toolbar modes: we handle those correctly already
         overwriteable_modes = ('line_identify', 'line_select', 'cont_select', 'cont_exclude', '')
         #from astropy import log
         #log.setLevel('DEBUG')
         if self.mode == 'Fit Line':
             if init:
-                self.spectrum.specfit(interactive=True) # , print_message=False)
+                log.info("Activating fitter")
+                self.spectrum.plotter.activate_interactive_fitter()
+                assert self.spectrum.plotter._active_gui is not None
             self.spectrum.specfit.debug = self.spectrum.specfit._debug = True
             if self.line_identify:
                 if self.toolbar.mode in overwriteable_modes:
@@ -101,7 +103,9 @@ class PyspeckitViewer(DataViewer):
                 log.info("Select mode")
         elif self.mode == 'Fit Continuum':
             if init:
-                self.spectrum.baseline(interactive=True, reset_selection=True) # , print_message=False)
+                log.info("Activating continuum fitter")
+                self.spectrum.plotter.activate_interactive_baseline_fitter(reset_selection=True)
+                assert self.spectrum.plotter._active_gui is not None
             self.spectrum.baseline.debug = self.spectrum.baseline._debug = True
             if self.cont_select:
                 if self.toolbar.mode in overwriteable_modes:
@@ -223,7 +227,7 @@ class PyspeckitViewer(DataViewer):
         def apply_mode(mode):
 
             if self.line_select or self.cont_select:
-                assert self.spectrum._active_gui is not None, "No active GUI tool in pyspeckit"
+                assert self.spectrum.plotter._active_gui is not None, "No active GUI tool in pyspeckit"
                 roi = mode.roi()
                 log.info("ROI: {0}".format(roi))
                 if isinstance(roi, RectangularROI):
@@ -235,7 +239,9 @@ class PyspeckitViewer(DataViewer):
                 if x1>x2:
                     x1,x2 = x2,x1
                 
-                self.spectrum._active_gui.selectregion(xmin=x1, xmax=x2)
+                self.spectrum.plotter._active_gui.selectregion(xmin=x1,
+                                                               xmax=x2,
+                                                               highlight=True)
 
         rect = RectangleMode(axes, roi_callback=apply_mode)
         xra = HRangeMode(axes, roi_callback=apply_mode)
