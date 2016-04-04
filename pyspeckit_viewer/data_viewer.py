@@ -59,17 +59,22 @@ class PyspeckitViewer(DataViewer):
 
         # do not allow THIS to override "official" toolbar modes: we handle
         # those correctly already
-        overwriteable_modes = ('line_identify', 'line_select', 'cont_select', 'cont_exclude', '')
+        overwriteable_modes = ('line_panzoom', 'line_identify',
+                               'line_select','cont_keyboard',
+                               'cont_panzoom', 'cont_select',
+                               'cont_exclude', 'line_keyboard', '')
 
         if self.mode.startswith('line'):
             if init:
                 log.info("Activating fitter")
+                self.spectrum.specfit.clear_all_connections()
                 self.spectrum.plotter.activate_interactive_fitter()
                 assert self.spectrum.plotter._active_gui is not None
             self.spectrum.specfit.debug = self.spectrum.specfit._debug = True
-        if self.mode.startswith('cont'):
+        elif self.mode.startswith('cont'):
             if init:
                 log.info("Activating continuum fitter")
+                self.spectrum.baseline.clear_all_connections()
                 self.spectrum.plotter.activate_interactive_baseline_fitter(reset_selection=True)
                 assert self.spectrum.plotter._active_gui is not None
             self.spectrum.baseline.debug = self.spectrum.baseline._debug = True
