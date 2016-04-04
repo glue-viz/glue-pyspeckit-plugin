@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>373</width>
-    <height>341</height>
+    <height>366</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -24,19 +24,8 @@
        <string>Fit Line</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="3" column="0">
-        <widget class="QRadioButton" name="radio_line_selection">
-         <property name="text">
-          <string>Region selection</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QRadioButton" name="radio_line_peak">
-         <property name="text">
-          <string>Peak/width identification</string>
-         </property>
-        </widget>
+       <item row="7" column="0">
+        <widget class="QComboBox" name="combo_line_fitters"/>
        </item>
        <item row="1" column="0">
         <widget class="QLabel" name="label_3">
@@ -52,6 +41,23 @@
         </widget>
        </item>
        <item row="4" column="0">
+        <widget class="QRadioButton" name="radio_line_select">
+         <property name="text">
+          <string>Region selection</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QTextEdit" name="text_line"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QRadioButton" name="radio_line_identify">
+         <property name="text">
+          <string>Peak/width identification</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
         <widget class="QLabel" name="label_2">
          <property name="font">
           <font>
@@ -65,10 +71,18 @@
         </widget>
        </item>
        <item row="5" column="0">
-        <widget class="QComboBox" name="combo_line_fitter_2"/>
+        <widget class="QRadioButton" name="radio_line_keyboard">
+         <property name="text">
+          <string>Keyboard shortcut mode</string>
+         </property>
+        </widget>
        </item>
-       <item row="6" column="0">
-        <widget class="QTextEdit" name="text_line"/>
+       <item row="2" column="0">
+        <widget class="QRadioButton" name="radio_line_panzoom">
+         <property name="text">
+          <string>Pan/Zoom</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -77,7 +91,14 @@
        <string>Fit Continuum</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="4" column="0">
+       <item row="5" column="0">
+        <widget class="QRadioButton" name="radio_cont_keyboard">
+         <property name="text">
+          <string>Keyboard shortcut mode</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
         <widget class="QLabel" name="label_2">
          <property name="font">
           <font>
@@ -103,23 +124,30 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="0">
-        <widget class="QComboBox" name="radio_cont_fitter"/>
+       <item row="7" column="0">
+        <widget class="QComboBox" name="combo_cont_fitters"/>
        </item>
-       <item row="2" column="0">
-        <widget class="QRadioButton" name="radio_cont_selection">
+       <item row="3" column="0">
+        <widget class="QRadioButton" name="radio_cont_select">
          <property name="text">
           <string>Region selection</string>
          </property>
         </widget>
        </item>
-       <item row="6" column="0">
+       <item row="8" column="0">
         <widget class="QTextEdit" name="text_continuum"/>
        </item>
-       <item row="3" column="0">
-        <widget class="QRadioButton" name="radio_cont_exclusion">
+       <item row="4" column="0">
+        <widget class="QRadioButton" name="radio_cont_exclude">
          <property name="text">
           <string>Region exclusion</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QRadioButton" name="radio_cont_panzoom">
+         <property name="text">
+          <string>Pan/Zoom</string>
          </property>
         </widget>
        </item>
