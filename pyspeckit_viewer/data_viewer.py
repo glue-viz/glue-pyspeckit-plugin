@@ -199,7 +199,8 @@ class PyspeckitViewer(DataViewer):
             xdata = u.Quantity(data[x_comp_id], xunit)
             ydata = data[y_comp_id]
         else:
-            raise ValueError("??!?!?!!?wtf?!?!?!")
+            raise ValueError("Data have {0} dimensions.  Only 1D and 3D data"
+                             " are supported".format(data.ndim))
 
         self._options_widget.x_att = x_comp_id.label
         log.info("Done averaging or loading 1d")
