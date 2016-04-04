@@ -146,7 +146,7 @@ class PyspeckitViewer(DataViewer):
                 cubedata = np.ma.masked_array(cubedata, ~mask)
                 meandata = cubedata.mean(axis=2).mean(axis=1)
             else:
-                meandata = cubedata.mean(axis=(1,2))
+                meandata = np.nanmean(cubedata, axis=(1,2))
             log.info('meandata shape: {0}'.format(meandata.shape))
             ydata = meandata
             xdata = data[x_comp_id][:,0,0]
