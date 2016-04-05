@@ -32,8 +32,7 @@ class PyspeckitViewer(DataViewer):
         self._control_panel = ControlPanel()
         self._control_panel.modeChanged.connect(lambda mode: self.set_mode(init=True))
         self._control_panel.fitEvent.connect(nonpartial(self.run_fitter))
-        # TODO: implement subtraction
-        # self._control_panel.subtractEvent.connect(nonpartial(self.subtract))
+        self._control_panel.subtractEvent.connect(nonpartial(self.subtract))
 
         self._options_widget = OptionsWidget(data_viewer=self)
 
@@ -227,3 +226,24 @@ class PyspeckitViewer(DataViewer):
 
     def options_widget(self):
         return self._options_widget
+
+    def subtract(self):
+        """
+        Subtract off the fitted model.
+        Baseline (continuum) has an 'unsubtract' feature;
+        line fitting does not (by default).
+        """
+        if self.mode.startswith('line'):
+            if hasattr(self.spectrum.specfit, 'subtracted') and self.spectrum.specfit.subtracted:
+                self.spectrum.data += self._line_model
+                self.spectrum.specfit.subtracted = False
+            model = self.spectrum.specfit.get_full_model()
+            self.spectrum.data -= model
+            self._line_model = model
+            self.spectrum.specfit.subtracted = True
+        elif self.mode.startswith('cont'):
+            if self.spectrum.baseline.subtracted:
+                self.spectrum.baseline.unsubtract()
+            model = self.spectrum.baseline.get_model()
+            self.spectrum.data -= model
+            self.spectrum.baseline.subtracted = True
