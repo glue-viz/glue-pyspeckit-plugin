@@ -4,30 +4,100 @@ import pyspeckit
 import numpy as np
 from astropy import units as u
 
+from qtpy import QtWidgets
+from qtpy.QtCore import Qt
+
 from glue.logger import logger as log
-from glue.external.qt.QtCore import Qt
-from glue.external.qt import QtGui
 
 from glue.core.roi import RectangularROI, XRangeROI
 from glue.viewers.common.qt.data_viewer import DataViewer
 from glue.viewers.common.qt.mpl_widget import MplWidget
-from glue.viewers.common.qt.toolbar import GlueToolbar
-from glue.viewers.common.qt.mouse_mode import (RectangleMode, HRangeMode,)
+from glue.viewers.common.qt.mpl_toolbar import MatplotlibViewerToolbar
+from glue.viewers.common.qt.mouse_mode import RectangleMode, HRangeMode
 from glue.utils import nonpartial
+from glue.config import viewer_tool
 
 from .viewer_options import OptionsWidget
 from .control_panel import ControlPanel
+
+
+def apply_mode(mode):
+
+    if mode.viewer.toolbar.mode in ('line_select', 'cont_select'):
+
+        assert mode.viewer.spectrum.plotter._active_gui is not None, "No active GUI tool in pyspeckit"
+
+        roi = mode.roi()
+
+        log.info("ROI: {0}".format(roi))
+
+        if isinstance(roi, RectangularROI):
+            x1 = roi.xmin
+            x2 = roi.xmax
+        elif isinstance(roi, XRangeROI):
+            x1 = roi.min
+            x2 = roi.max
+        if x1 > x2:
+            x1, x2 = x2, x1
+
+        mode.viewer.spectrum.plotter._active_gui.selectregion(xmin=x1,
+                                                              xmax=x2,
+                                                              highlight=True)
+
+
+@viewer_tool
+class PyspeckitRectangleMode(RectangleMode):
+    tool_id = 'pyspeckit:rectangle'
+    def __init__(self, *args, **kwargs):
+        super(PyspeckitRectangleMode, self).__init__(*args, **kwargs)
+        self._roi_callback = apply_mode
+
+
+@viewer_tool
+class PyspeckitHRangeMode(HRangeMode):
+    tool_id = 'pyspeckit:hrange'
+    def __init__(self, *args, **kwargs):
+        super(PyspeckitHRangeMode, self).__init__(*args, **kwargs)
+        self._roi_callback = apply_mode
+
+
+class PyspeckitViewerToolbar(MatplotlibViewerToolbar):
+
+    _custom_mode = ''
+
+    @property
+    def mode(self):
+        if self._mpl_nav.mode == '':
+            return self._custom_mode
+        else:
+            return self._mpl_nav.mode
+
+    @mode.setter
+    def mode(self, value):
+        if value in self.tools:
+            self._mpl_nav.mode = value
+        else:
+            self._custom_mode = value
 
 
 class PyspeckitViewer(DataViewer):
 
     LABEL = "Pyspeckit data viewer"
 
+    _toolbar_cls = PyspeckitViewerToolbar
+    tools = ['pyspeckit:rectangle', 'pyspeckit:hrange']
+
     def __init__(self, session, parent=None):
         super(PyspeckitViewer, self).__init__(session, parent=parent)
 
-        self._mpl_widget = MplWidget()
-        self._mpl_axes = self._mpl_widget.canvas.fig.add_subplot(1,1,1)
+        class Client(object):
+            pass
+
+        self.central_widget = MplWidget()
+        self.client = Client()
+        self.client.axes = self.central_widget.canvas.fig.add_subplot(1, 1, 1)
+
+        self.central_widget = self.central_widget
 
         self._control_panel = ControlPanel()
         self._control_panel.modeChanged.connect(lambda mode: self.set_mode(init=True))
@@ -37,14 +107,12 @@ class PyspeckitViewer(DataViewer):
 
         self._options_widget = OptionsWidget(data_viewer=self)
 
-        self._splitter = QtGui.QSplitter()
+        self._splitter = QtWidgets.QSplitter()
         self._splitter.setOrientation(Qt.Horizontal)
-        self._splitter.addWidget(self._mpl_widget)
+        self._splitter.addWidget(self.central_widget)
         self._splitter.addWidget(self._control_panel)
 
         self.setCentralWidget(self._splitter)
-
-        self.toolbar = self.make_toolbar()
 
         self.spectra = {}
         self.spectrum = None
@@ -60,7 +128,7 @@ class PyspeckitViewer(DataViewer):
         # do not allow THIS to override "official" toolbar modes: we handle
         # those correctly already
         overwriteable_modes = ('line_panzoom', 'line_identify',
-                               'line_select','cont_keyboard',
+                               'line_select', 'cont_keyboard',
                                'cont_panzoom', 'cont_select',
                                'cont_exclude', 'line_keyboard', '')
 
@@ -126,7 +194,7 @@ class PyspeckitViewer(DataViewer):
         # TODO: have a better way to query the unit in Glue Data objects
 
         # DO NOT use this hack IF pyspeckit version includes the fix that checks for 'number'
-        #self._mpl_axes.figure.number = 1
+        #self.axes.figure.number = 1
 
         self.set_new_data(data)
 
@@ -140,7 +208,7 @@ class PyspeckitViewer(DataViewer):
         if data.ndim == 3:
             x_comp_id = data.world_component_ids[0]
             xunit = data.coords.wcs.wcs.cunit[2]
-            cubedata = data[self._options_widget.y_att[0]]
+            cubedata = data[self._options_widget.y_att]
             log.info('cubedata shape: {0}'.format(cubedata.shape))
             if mask is not None:
                 cubedata = np.ma.masked_array(cubedata, ~mask)
@@ -156,7 +224,7 @@ class PyspeckitViewer(DataViewer):
             raise ValueError("can't handle images")
         elif data.ndim == 1:
             x_comp_id = data.world_component_ids[0]
-            y_comp_id = self._options_widget.y_att[0]
+            y_comp_id = self._options_widget.y_att
             xunit = data.coords.wcs.wcs.cunit[0]
             xdata = u.Quantity(data[x_comp_id], xunit)
             ydata = data[y_comp_id]
@@ -168,7 +236,7 @@ class PyspeckitViewer(DataViewer):
         log.info("Done averaging or loading 1d")
 
         sp = pyspeckit.Spectrum(data=ydata, xarr=xdata)
-        sp.plotter(axis=self._mpl_axes, clear=False, color=data.style.color)
+        sp.plotter(axis=self.axes, clear=False, color=data.style.color)
         sp.plotter.figure.canvas.manager.toolbar = self.toolbar
         sp.plotter.axis.figure.canvas.mpl_connect('button_press_event',
                                                   self.click_manager)
@@ -182,48 +250,6 @@ class PyspeckitViewer(DataViewer):
         #    self.spectrum.xarr = pyspeckit.units.SpectroscopicAxis(xdata)
 
         #    self.spectrum.plotter(clear=True)
-
-
-    def _mouse_modes(self):
-        axes = self._mpl_axes
-
-        def apply_mode(mode):
-
-            if self.mode in ('line_select', 'cont_select'):
-                assert self.spectrum.plotter._active_gui is not None, "No active GUI tool in pyspeckit"
-                roi = mode.roi()
-                log.info("ROI: {0}".format(roi))
-                if isinstance(roi, RectangularROI):
-                    x1 = roi.xmin
-                    x2 = roi.xmax
-                elif isinstance(roi, XRangeROI):
-                    x1 = roi.min
-                    x2 = roi.max
-                if x1>x2:
-                    x1,x2 = x2,x1
-
-                self.spectrum.plotter._active_gui.selectregion(xmin=x1,
-                                                               xmax=x2,
-                                                               highlight=True)
-
-        rect = RectangleMode(axes, roi_callback=apply_mode)
-        xra = HRangeMode(axes, roi_callback=apply_mode)
-        return [rect, xra,]
-
-    def make_toolbar(self):
-        toolbar = GlueToolbar(self._mpl_widget.canvas, self,
-                              name='pyspeckit Plot')
-
-        for mode in self._mouse_modes():
-            toolbar.add_mode(mode)
-            #add_callback(mode, 'enabled', nonpartial(self.set_mode))
-
-        #for mode_result in toolbar. :
-        #    mode_result.triggered.connect(nonpartial(self.set_mode))
-        toolbar.actionTriggered.connect(nonpartial(self.set_mode))
-
-        self.addToolBar(toolbar)
-        return toolbar
 
     def options_widget(self):
         return self._options_widget

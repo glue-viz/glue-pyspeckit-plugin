@@ -2,17 +2,18 @@ import os
 
 from glue.logger import logger as log
 
-from glue.external.qt import QtGui, QtCore, get_qapp
+from qtpy import QtCore, QtWidgets
 
 from glue.utils import nonpartial
-from glue.utils.qt import load_ui, update_combobox
-from glue.utils.qt.widget_properties import CurrentTabProperty, ButtonProperty, TextProperty, CurrentComboTextProperty
+from glue.utils.qt import load_ui, update_combobox, get_qapp
+from glue.utils.qt.widget_properties import (CurrentTabProperty, TextProperty,
+                                             CurrentComboTextProperty)
 
 # TODO: rename default_Registry to default_registry
 from pyspeckit.spectrum.fitters import default_Registry
 
 
-class ControlPanel(QtGui.QWidget):
+class ControlPanel(QtWidgets.QWidget):
 
     modeChanged = QtCore.Signal(object)
     fitEvent = QtCore.Signal(object)
@@ -31,7 +32,7 @@ class ControlPanel(QtGui.QWidget):
         super(ControlPanel, self).__init__(parent=parent)
 
         self.ui = load_ui('control_panel.ui', self,
-                           directory=os.path.dirname(__file__))
+                          directory=os.path.dirname(__file__))
 
         # Set up tabs
 
@@ -40,7 +41,7 @@ class ControlPanel(QtGui.QWidget):
 
         # Set up radio buttons
 
-        self._line_mode = QtGui.QButtonGroup()
+        self._line_mode = QtWidgets.QButtonGroup()
         self._line_mode.addButton(self.ui.radio_line_panzoom)
         self._line_mode.addButton(self.ui.radio_line_identify)
         self._line_mode.addButton(self.ui.radio_line_select)
@@ -50,7 +51,7 @@ class ControlPanel(QtGui.QWidget):
 
         self._line_mode.buttonClicked.connect(nonpartial(self._mode_changed))
 
-        self._cont_mode = QtGui.QButtonGroup()
+        self._cont_mode = QtWidgets.QButtonGroup()
         self._cont_mode.addButton(self.ui.radio_cont_panzoom)
         self._cont_mode.addButton(self.ui.radio_cont_select)
         self._cont_mode.addButton(self.ui.radio_cont_exclude)
