@@ -1,6 +1,6 @@
 import os
 
-from glue.external.qt import QtGui
+from qtpy import QtWidgets
 
 from glue.core.qt.data_combo_helper import ComponentIDComboHelper
 from glue.utils.qt.widget_properties import CurrentComboProperty, TextProperty
@@ -9,7 +9,7 @@ from glue.utils.qt import load_ui
 __all__ = ["OptionsWidget"]
 
 
-class OptionsWidget(QtGui.QWidget):
+class OptionsWidget(QtWidgets.QWidget):
 
     x_att = TextProperty('ui.text_x_attribute')
     y_att = CurrentComboProperty('ui.combo_y_attribute')
@@ -29,7 +29,7 @@ class OptionsWidget(QtGui.QWidget):
         self._data = None
 
     def append(self, data):
-        self.y_helper.append(data)
+        self.y_helper.append_data(data)
 
     def remove(self, data):
-        self.y_helper.remove(data)
+        self.y_helper.remove_data(data)

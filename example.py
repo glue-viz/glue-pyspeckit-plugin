@@ -8,7 +8,7 @@ data_collection = DataCollection([data])
 hub = data_collection.hub
 session = Session(data_collection=data_collection, hub=hub)
 
-from glue.external.qt import get_qapp
+from glue.utils.qt import get_qapp
 
 app = get_qapp()
 
