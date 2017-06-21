@@ -171,11 +171,11 @@ class PyspeckitViewer(DataViewer):
                 self.spectrum.specfit.guesspeakwidth(event)
                 self.spectrum.plotter.refresh()
             elif self.mode == 'line_select':
-                self.spectrum.specfit.selectregion_interactive(event)
+                self.spectrum.specfit._selectregion_interactive(event)
             elif self.mode == 'cont_select':
-                self.spectrum.baseline.selectregion_interactive(event)
+                self.spectrum.baseline._selectregion_interactive(event)
             elif self.mode == 'cont_exclude':
-                self.spectrum.baseline.selectregion_interactive(event, mark_include=False)
+                self.spectrum.baseline._selectregion_interactive(event, mark_include=False)
             else:
                 log.info("Not in line fitter mode, clicks do NOTHING.")
         else:
